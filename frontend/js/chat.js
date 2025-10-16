@@ -229,8 +229,8 @@ class ChatManager {
             // Instead of loading from server, use the chat data we just received
             this.currentChatId = chat.id;
             this.currentChat = chat;
-            this.renderMessages();
-            this.updateChatHeader();
+            this.renderMessages(chat.messages || []);
+            this.updateChatHeader(chat);
             this.activateChat(chat.id);
             
             UI.showToast('New chat created successfully', 'success');
@@ -318,7 +318,7 @@ class ChatManager {
      * Render messages in chat
      * @param {Array} messages - Array of messages
      */
-    renderMessages(messages) {
+    renderMessages(messages = []) {
         if (!this.messagesContainer) return;
 
         this.messagesContainer.innerHTML = '';
