@@ -25,8 +25,10 @@
             </div>
             
             <form id="auth-form" class="auth-form">
+                <!-- Hidden username field for accessibility and password manager compatibility -->
+                <input type="text" name="username" autocomplete="username" style="display: none;" value="nebula-user" readonly>
                 <div class="input-group">
-                    <input type="password" id="password" placeholder="Access Code" autocomplete="current-password" required>
+                    <input type="password" id="password" name="password" placeholder="Access Code" autocomplete="current-password" required>
                     <button type="submit">
                         <i class="fas fa-arrow-right"></i>
                     </button>
