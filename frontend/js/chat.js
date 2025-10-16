@@ -235,11 +235,18 @@ class ChatManager {
             
             UI.showToast('New chat created successfully', 'success');
             
-            // Small delay to allow KV storage to propagate before enabling input
+            // Disable input initially to prevent sending before KV propagation
+            this.disableInput();
+            
+            // Show loading state while waiting for KV storage propagation
+            UI.showToast('Setting up chat...', 'info');
+            
+            // Longer delay to allow KV storage to propagate before enabling input
             setTimeout(() => {
                 this.enableInput();
                 this.messageInput?.focus();
-            }, 1000);
+                UI.showToast('Chat ready!', 'success');
+            }, 3000); // Increased from 1 second to 3 seconds
         } catch (error) {
             console.error('Failed to create chat:', error);
             UI.showToast('Failed to create new chat', 'error');
@@ -422,8 +429,26 @@ class ChatManager {
             // Show typing indicator
             this.typingIndicator = UI.showTypingIndicator(this.messagesContainer);
             
-            // Send message to API
-            const response = await API.sendMessage(this.currentChatId, message);
+            // Send message to API with retry for KV propagation
+            let response;
+            let retryCount = 0;
+            const maxRetries = 3;
+            
+            while (retryCount < maxRetries) {
+                try {
+                    response = await API.sendMessage(this.currentChatId, message);
+                    break; // Success, exit retry loop
+                } catch (error) {
+                    if (error.message === 'Chat not found' && retryCount < maxRetries - 1) {
+                        retryCount++;
+                        UI.showToast(`Waiting for chat sync... (${retryCount}/${maxRetries})`, 'info');
+                        // Wait 2 seconds before retry
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    } else {
+                        throw error; // Re-throw if it's not a chat not found error or max retries reached
+                    }
+                }
+            }
             
             // Remove typing indicator
             UI.hideTypingIndicator(this.typingIndicator);

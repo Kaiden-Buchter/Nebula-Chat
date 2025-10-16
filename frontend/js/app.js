@@ -183,15 +183,17 @@ class NebulaApp {
      * Setup service worker for offline support
      */
     setupServiceWorker() {
-        if ('serviceWorker' in navigator && !CONFIG.IS_DEVELOPMENT) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(registration => {
-                    console.log('🔧 Service Worker registered:', registration.scope);
-                })
-                .catch(error => {
-                    console.warn('🔧 Service Worker registration failed:', error);
-                });
-        }
+        // Service worker disabled for now to avoid 404 errors
+        // if ('serviceWorker' in navigator && !CONFIG.IS_DEVELOPMENT) {
+        //     navigator.serviceWorker.register('/sw.js')
+        //         .then(registration => {
+        //             console.log('🔧 Service Worker registered:', registration.scope);
+        //         })
+        //         .catch(error => {
+        //             console.warn('🔧 Service Worker registration failed:', error);
+        //         });
+        // }
+        console.log('🔧 Service Worker registration skipped');
     }
 
     /**
