@@ -233,7 +233,7 @@ class ChatManager {
             this.updateChatHeader();
             this.activateChat(chat.id);
             
-            UI.showToast('New chat created', 'success');
+            UI.showToast('New chat created successfully', 'success');
             
             // Focus message input
             setTimeout(() => {
