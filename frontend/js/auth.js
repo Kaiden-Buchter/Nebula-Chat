@@ -64,10 +64,21 @@ class AuthManager {
     /**
      * Check authentication status on load
      */
-    checkAuthStatus() {
-        if (API.isAuthenticated()) {
+    async checkAuthStatus() {
+        // Wait a bit for API to initialize and load tokens
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        console.log('🔍 Checking authentication status...');
+        console.log('API exists:', !!API);
+        console.log('API.isAuthenticated:', API ? API.isAuthenticated() : 'API not available');
+        
+        if (API && API.isAuthenticated()) {
+            console.log('✅ User is authenticated, showing app');
+            this.isAuthenticated = true;
             this.showApp();
         } else {
+            console.log('❌ User not authenticated, showing login');
+            this.isAuthenticated = false;
             this.showAuthModal();
         }
     }

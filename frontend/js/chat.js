@@ -145,13 +145,21 @@ class ChatManager {
         try {
             UI.showLoading('Loading chats...');
             
+            // Wait a bit for Auth to be properly initialized
+            await new Promise(resolve => setTimeout(resolve, 200));
+            
             // Check if we're authenticated first
-            if (!Auth || !Auth.isAuthenticated) {
+            console.log('🔍 Auth check - Auth exists:', !!Auth);
+            console.log('🔍 Auth check - isUserAuthenticated method:', !!Auth?.isUserAuthenticated);
+            console.log('🔍 Auth check - isUserAuthenticated result:', Auth?.isUserAuthenticated());
+            
+            if (!Auth || !Auth.isUserAuthenticated || !Auth.isUserAuthenticated()) {
                 console.log('❌ Not authenticated, skipping chat loading');
                 this.showWelcomeMessage();
                 return;
             }
             
+            console.log('✅ Authenticated, proceeding to load chats...');
             const chats = await API.getChats();
             console.log(`📂 Loaded ${chats.length} chats:`, chats);
             

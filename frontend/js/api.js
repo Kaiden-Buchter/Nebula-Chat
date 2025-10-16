@@ -23,9 +23,13 @@ class ApiClient {
      */
     loadTokenFromStorage() {
         const tokenData = Utils.storage.get(CONFIG.SECURITY.TOKEN_STORAGE_KEY);
+        console.log('🔑 Loading token from storage:', tokenData ? 'Found' : 'Not found');
         if (tokenData) {
             this.token = tokenData.accessToken;
             this.refreshToken = tokenData.refreshToken;
+            console.log('🔑 Token loaded successfully');
+        } else {
+            console.log('🔑 No token found in storage');
         }
     }
 
@@ -372,8 +376,14 @@ class ApiClient {
      * Check if user is authenticated
      * @returns {boolean} Authentication status
      */
+    /**
+     * Check if user is authenticated
+     * @returns {boolean} Authentication status
+     */
     isAuthenticated() {
-        return !!this.token;
+        const hasToken = !!this.token;
+        console.log('🔍 API isAuthenticated check:', hasToken, 'Token:', this.token ? 'Present' : 'Missing');
+        return hasToken;
     }
 }
 
