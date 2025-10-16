@@ -235,10 +235,11 @@ class ChatManager {
             
             UI.showToast('New chat created successfully', 'success');
             
-            // Focus message input
+            // Small delay to allow KV storage to propagate before enabling input
             setTimeout(() => {
+                this.enableInput();
                 this.messageInput?.focus();
-            }, 100);
+            }, 1000);
         } catch (error) {
             console.error('Failed to create chat:', error);
             UI.showToast('Failed to create new chat', 'error');
