@@ -207,6 +207,17 @@ class ChatManager {
     }
 
     /**
+     * Activate a chat session in the UI
+     * @param {string} chatId - Chat ID to activate
+     */
+    activateChat(chatId) {
+        // Update chat list active state
+        this.chatSessions?.querySelectorAll('.chat-session').forEach(session => {
+            session.classList.toggle('active', session.dataset.chatId === chatId);
+        });
+    }
+
+    /**
      * Create new chat
      */
     async createNewChat() {
@@ -214,7 +225,13 @@ class ChatManager {
             const chat = await API.createChat();
             this.chats.set(chat.id, chat);
             this.renderChatList();
-            await this.loadChat(chat.id);
+            
+            // Instead of loading from server, use the chat data we just received
+            this.currentChatId = chat.id;
+            this.currentChat = chat;
+            this.renderMessages();
+            this.updateChatHeader();
+            this.activateChat(chat.id);
             
             UI.showToast('New chat created', 'success');
             
@@ -238,21 +255,43 @@ class ChatManager {
         try {
             UI.showLoading('Loading chat...');
             
-            const chatData = await API.getChat(chatId);
+            // First check if we have the chat locally
+            let chatData = this.chats.get(chatId);
+            
+            // If not local, try to fetch from server
+            if (!chatData) {
+                chatData = await API.getChat(chatId);
+                this.chats.set(chatId, chatData);
+            }
             
             this.currentChatId = chatId;
-            this.chats.set(chatId, chatData);
+            this.currentChat = chatData;
             
             this.updateChatHeader(chatData);
             this.renderMessages(chatData.messages || []);
             this.renderChatList();
+            this.activateChat(chatId);
             
             // Enable input
             this.enableInput();
             
         } catch (error) {
             console.error('Failed to load chat:', error);
-            UI.showToast('Failed to load chat', 'error');
+            
+            // If it's a newly created chat that hasn't propagated yet, 
+            // check if we have it locally
+            const localChat = this.chats.get(chatId);
+            if (localChat) {
+                this.currentChatId = chatId;
+                this.currentChat = localChat;
+                this.updateChatHeader(localChat);
+                this.renderMessages(localChat.messages || []);
+                this.activateChat(chatId);
+                this.enableInput();
+                UI.showToast('Using local chat data', 'info');
+            } else {
+                UI.showToast('Failed to load chat', 'error');
+            }
         } finally {
             UI.hideLoading();
         }
