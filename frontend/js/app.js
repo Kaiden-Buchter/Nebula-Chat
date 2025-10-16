@@ -86,6 +86,10 @@ class NebulaApp {
         
         // Setup periodic health checks
         this.setupHealthChecks();
+        
+        // Trigger app ready event to initialize chat loading
+        console.log('🚀 Triggering app initialization...');
+        document.dispatchEvent(new Event('app-ready'));
     }
 
     /**

@@ -141,9 +141,19 @@ class ChatManager {
      * Load all chats
      */
     async loadChats() {
+        console.log('🔄 Loading chats...');
         try {
             UI.showLoading('Loading chats...');
+            
+            // Check if we're authenticated first
+            if (!Auth || !Auth.isAuthenticated) {
+                console.log('❌ Not authenticated, skipping chat loading');
+                this.showWelcomeMessage();
+                return;
+            }
+            
             const chats = await API.getChats();
+            console.log(`📂 Loaded ${chats.length} chats:`, chats);
             
             this.chats.clear();
             chats.forEach(chat => {
@@ -155,13 +165,15 @@ class ChatManager {
             // Load the most recent chat or show welcome
             if (chats.length > 0) {
                 const recentChat = chats.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
+                console.log('📖 Loading most recent chat:', recentChat.id);
                 await this.loadChat(recentChat.id);
             } else {
+                console.log('📝 No chats found, showing welcome message');
                 this.showWelcomeMessage();
             }
         } catch (error) {
-            console.error('Failed to load chats:', error);
-            UI.showToast('Failed to load chats', 'error');
+            console.error('❌ Failed to load chats:', error);
+            UI.showToast(`Failed to load chats: ${error.message}`, 'error');
             this.showWelcomeMessage();
         } finally {
             UI.hideLoading();

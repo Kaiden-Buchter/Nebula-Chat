@@ -5,7 +5,20 @@
 
 class AuthManager {
     constructor() {
-        this.isAuthenticated = false;
+     /**
+     * Show the main application
+     */
+    showApp() {
+        if (this.authModal) {
+            this.authModal.classList.add('hidden');
+            document.getElementById('app')?.classList.remove('hidden');
+            
+            console.log('🔐 Authentication successful, showing app...');
+            
+            // Trigger app initialization
+            document.dispatchEvent(new Event('app-ready'));
+        }
+    }isAuthenticated = false;
         this.authModal = null;
         this.authForm = null;
         this.passwordInput = null;
@@ -152,6 +165,8 @@ class AuthManager {
         if (this.authModal) {
             this.authModal.classList.add('hidden');
             document.getElementById('app')?.classList.remove('hidden');
+            
+            console.log('🔐 Authentication successful, showing app...');
             
             // Trigger app initialization
             document.dispatchEvent(new Event('app-ready'));
