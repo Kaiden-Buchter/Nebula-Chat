@@ -282,15 +282,20 @@ class ChatManager {
 
         try {
             UI.showLoading('Loading chat...');
+            console.log(`📖 Loading chat: ${chatId}`);
             
             // First check if we have the chat locally
             let chatData = this.chats.get(chatId);
             
             // If not local, try to fetch from server
             if (!chatData) {
+                console.log('💾 Chat not in local cache, fetching from server...');
                 chatData = await API.getChat(chatId);
                 this.chats.set(chatId, chatData);
             }
+            
+            console.log('📋 Chat data loaded:', chatData);
+            console.log('💬 Messages in chat:', chatData.messages?.length || 0, chatData.messages);
             
             this.currentChatId = chatId;
             this.currentChat = chatData;
@@ -347,21 +352,29 @@ class ChatManager {
      * @param {Array} messages - Array of messages
      */
     renderMessages(messages = []) {
-        if (!this.messagesContainer) return;
+        console.log('🎨 Rendering messages:', messages.length, messages);
+        if (!this.messagesContainer) {
+            console.error('❌ Messages container not found!');
+            return;
+        }
 
         this.messagesContainer.innerHTML = '';
 
         if (messages.length === 0) {
+            console.log('📭 No messages to display, showing empty state');
             this.showEmptyState();
             return;
         }
 
-        messages.forEach(message => {
+        console.log('📝 Adding messages to UI...');
+        messages.forEach((message, index) => {
+            console.log(`📝 Adding message ${index + 1}:`, message);
             this.addMessageToUI(message, false);
         });
 
         // Scroll to bottom
         UI.scrollToBottom(this.messagesContainer, true);
+        console.log('✅ Messages rendered successfully');
     }
 
     /**
