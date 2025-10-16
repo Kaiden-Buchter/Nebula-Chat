@@ -17,19 +17,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Copy frontend files to root
-        run: |
-          cp -r frontend/* .
-          rm -rf frontend
-          ls -la
-
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: './frontend'
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
