@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Chat - API Health Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: radial-gradient(ellipse at top, #1e293b 0%, #0f172a 100%);
+            color: #f8fafc;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, #1e40af22 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, #7c3aed22 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, #059669aa 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a855f7, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            letter-spacing: -0.025em;
+        }
+        
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        .back-link:hover {
+            color: #3b82f6;
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        
+        .status-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .status-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: 16px;
+        }
+        
+        .status-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+        }
+        
+        .status-url {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: auto;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.checking {
+            background: #f59e0b;
+        }
+        
+        .status-indicator.online {
+            background: #10b981;
+        }
+        
+        .status-indicator.offline {
+            background: #ef4444;
+            animation: none;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .status-details {
+            margin-top: 16px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        .detail-value {
+            color: #e2e8f0;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .refresh-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        .refresh-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3);
+        }
+        
+        .refresh-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .logs-section {
+            margin-top: 40px;
+        }
+        
+        .logs-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .logs-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 16px;
+        }
+        
+        .log-entry {
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85rem;
+        }
+        
+        .log-entry.success {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: #22c55e;
+            color: #86efac;
+        }
+        
+        .log-entry.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #fca5a5;
+        }
+        
+        .log-entry.info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+            color: #93c5fd;
+        }
+        
+        .timestamp {
+            color: #64748b;
+            margin-right: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 0 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="account-creator.html" class="back-link">
+            ← Back to Account Creator
+        </a>
+        
+        <div class="header">
+            <h1>🔍 API Health Dashboard</h1>
+            <p class="subtitle">Monitor your Nebula Chat API status</p>
+        </div>
+        
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="status-header">
+                    <div>
+                        <div class="status-title">Main API Health</div>
+                        <div class="status-url">https://api.detailingzone.org/api/health</div>
+                    </div>
+                    <div class="status-indicator checking" id="health-indicator"></div>
+                </div>
+                <div class="status-details" id="health-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value" id="health-status">Checking...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Response Time</span>
+                        <span class="detail-value" id="health-response-time">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Last Check</span>
+                        <span class="detail-value" id="health-last-check">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-header">
+                    <div>
+                        <div class="status-title">Authentication</div>
+                        <div class="status-url">https://api.detailingzone.org/api/login</div>
+                    </div>
+                    <div class="status-indicator checking" id="auth-indicator"></div>
+                </div>
+                <div class="status-details" id="auth-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value" id="auth-status">Checking...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Response Time</span>
+                        <span class="detail-value" id="auth-response-time">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Last Check</span>
+                        <span class="detail-value" id="auth-last-check">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-header">
+                    <div>
+                        <div class="status-title">User Registration</div>
+                        <div class="status-url">https://api.detailingzone.org/api/register</div>
+                    </div>
+                    <div class="status-indicator checking" id="register-indicator"></div>
+                </div>
+                <div class="status-details" id="register-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value" id="register-status">Checking...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Response Time</span>
+                        <span class="detail-value" id="register-response-time">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Last Check</span>
+                        <span class="detail-value" id="register-last-check">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="refresh-button" onclick="checkAllEndpoints()">
+            🔄 Refresh All Checks
+        </button>
+        
+        <div class="logs-section">
+            <div class="logs-card">
+                <div class="logs-header">📋 Health Check Logs</div>
+                <div id="logs-container">
+                    <!-- Logs will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://api.detailingzone.org';
+        const logs = [];
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.unshift({ timestamp, message, type });
+            
+            // Keep only last 20 logs
+            if (logs.length > 20) {
+                logs.pop();
+            }
+            
+            updateLogsDisplay();
+        }
+        
+        function updateLogsDisplay() {
+            const container = document.getElementById('logs-container');
+            container.innerHTML = logs.map(log => `
+                <div class="log-entry ${log.type}">
+                    <span class="timestamp">[${log.timestamp}]</span>
+                    ${log.message}
+                </div>
+            `).join('');
+        }
+        
+        async function checkEndpoint(name, url, options = {}) {
+            const startTime = Date.now();
+            const indicator = document.getElementById(`${name}-indicator`);
+            const status = document.getElementById(`${name}-status`);
+            const responseTime = document.getElementById(`${name}-response-time`);
+            const lastCheck = document.getElementById(`${name}-last-check`);
+            
+            indicator.className = 'status-indicator checking';
+            status.textContent = 'Checking...';
+            
+            try {
+                const response = await fetch(url, {
+                    method: options.method || 'GET',
+                    headers: options.headers || {},
+                    body: options.body || null,
+                    ...options
+                });
+                
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+                
+                if (response.ok) {
+                    indicator.className = 'status-indicator online';
+                    status.textContent = `✅ Online (${response.status})`;
+                    responseTime.textContent = `${duration}ms`;
+                    addLog(`${name} endpoint is healthy (${duration}ms)`, 'success');
+                } else {
+                    indicator.className = 'status-indicator offline';
+                    status.textContent = `❌ Error ${response.status}`;
+                    responseTime.textContent = `${duration}ms`;
+                    addLog(`${name} endpoint returned ${response.status} error`, 'error');
+                }
+                
+                lastCheck.textContent = new Date().toLocaleTimeString();
+                
+            } catch (error) {
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+                
+                indicator.className = 'status-indicator offline';
+                status.textContent = '❌ Offline';
+                responseTime.textContent = `${duration}ms`;
+                lastCheck.textContent = new Date().toLocaleTimeString();
+                
+                addLog(`${name} endpoint failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function checkHealthEndpoint() {
+            await checkEndpoint('health', `${API_BASE_URL}/api/health`);
+        }
+        
+        async function checkAuthEndpoint() {
+            // Test auth endpoint with invalid credentials to check if it responds
+            await checkEndpoint('auth', `${API_BASE_URL}/api/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: 'test',
+                    password: 'test'
+                })
+            });
+        }
+        
+        async function checkRegisterEndpoint() {
+            // Test register endpoint with invalid data to check if it responds
+            await checkEndpoint('register', `${API_BASE_URL}/api/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: '',
+                    password: ''
+                })
+            });
+        }
+        
+        async function checkAllEndpoints() {
+            const button = document.querySelector('.refresh-button');
+            button.disabled = true;
+            button.textContent = '🔄 Checking...';
+            
+            addLog('Starting health check...', 'info');
+            
+            try {
+                await Promise.all([
+                    checkHealthEndpoint(),
+                    checkAuthEndpoint(),
+                    checkRegisterEndpoint()
+                ]);
+                
+                addLog('Health check completed', 'success');
+            } catch (error) {
+                addLog(`Health check failed: ${error.message}`, 'error');
+            }
+            
+            button.disabled = false;
+            button.textContent = '🔄 Refresh All Checks';
+        }
+        
+        // Initial check
+        addLog('Health dashboard initialized', 'info');
+        checkAllEndpoints();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(checkAllEndpoints, 30000);
+    </script>
+</body>
+</html>
