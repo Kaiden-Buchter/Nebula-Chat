@@ -127,7 +127,7 @@ class AuthManager {
                 this.showError(response.error || 'Invalid credentials');
             }
         } catch (error) {
-            console.error('Authentication failed:', error);
+            // Error already logged in API layer, just show user message
             this.showError(error.message || 'Authentication failed. Please try again.');
         } finally {
             this.setLoading(false);
