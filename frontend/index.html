@@ -140,11 +140,81 @@
             </div>
             
             <div class="admin-tabs">
-                <button class="tab-btn active" data-tab="create-user">Create User</button>
+                <button class="tab-btn active" data-tab="analytics">Analytics</button>
+                <button class="tab-btn" data-tab="create-user">Create User</button>
                 <button class="tab-btn" data-tab="manage-users">Manage Users</button>
             </div>
 
-            <div id="create-user" class="tab-content active">
+            <div id="analytics" class="tab-content active">
+                <div class="analytics-section">
+                    <h3>System Overview</h3>
+                    <div class="period-selector">
+                        <label for="analytics-period">Period:</label>
+                        <select id="analytics-period" onchange="loadAnalytics()">
+                            <option value="7">Last 7 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                        </select>
+                    </div>
+                    
+                    <div id="analytics-loading" class="loading">Loading analytics...</div>
+                    <div id="analytics-error" class="error-message" style="display: none;"></div>
+                    
+                    <div id="analytics-content" style="display: none;">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="total-calls">0</div>
+                                <div class="stat-label">Total API Calls</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="total-tokens">0</div>
+                                <div class="stat-label">Total Tokens Used</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="unique-users">0</div>
+                                <div class="stat-label">Active Users</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="avg-tokens">0</div>
+                                <div class="stat-label">Avg Tokens per Call</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analytics-section">
+                    <h3>Top Users</h3>
+                    <div class="period-selector">
+                        <label for="users-period">Period:</label>
+                        <select id="users-period" onchange="loadTopUsers()">
+                            <option value="7">Last 7 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                        </select>
+                    </div>
+                    
+                    <div id="users-loading" class="loading">Loading top users...</div>
+                    <div id="users-error" class="error-message" style="display: none;"></div>
+                    
+                    <div id="users-content" style="display: none;">
+                        <table class="user-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>API Calls</th>
+                                    <th>Tokens Used</th>
+                                    <th>Avg Tokens/Call</th>
+                                    <th>Last Active</th>
+                                </tr>
+                            </thead>
+                            <tbody id="top-users-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="create-user" class="tab-content">
                 <form id="create-user-form" class="auth-form">
                     <div class="input-group">
                         <input type="text" id="new-username" placeholder="Username" autocomplete="username" required>

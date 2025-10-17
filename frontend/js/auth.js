@@ -284,6 +284,9 @@ class AuthManager {
         if (adminModal) {
             adminModal.style.display = 'flex';
             this.initializeAdminPanel();
+            // Load analytics by default since it's the first tab
+            this.loadAnalytics();
+            this.loadTopUsers();
         }
     }
 
@@ -311,9 +314,12 @@ class AuthManager {
                     }
                 });
 
-                // Load users when switching to manage users tab
+                // Load data when switching tabs
                 if (tabId === 'manage-users') {
                     this.loadUsers();
+                } else if (tabId === 'analytics') {
+                    this.loadAnalytics();
+                    this.loadTopUsers();
                 }
             });
         });
@@ -525,7 +531,120 @@ class AuthManager {
     getCurrentUser() {
         return this.currentUser;
     }
+
+    /**
+     * Load analytics data
+     */
+    async loadAnalytics() {
+        const period = document.getElementById('analytics-period')?.value || '7';
+        const loadingEl = document.getElementById('analytics-loading');
+        const errorEl = document.getElementById('analytics-error');
+        const contentEl = document.getElementById('analytics-content');
+
+        if (loadingEl) loadingEl.style.display = 'block';
+        if (errorEl) errorEl.style.display = 'none';
+        if (contentEl) contentEl.style.display = 'none';
+
+        try {
+            const response = await API.makeRequest(`/api/admin/analytics?period=${period}`);
+            
+            if (response.success) {
+                const data = response.data;
+                
+                const totalCallsEl = document.getElementById('total-calls');
+                const totalTokensEl = document.getElementById('total-tokens');
+                const uniqueUsersEl = document.getElementById('unique-users');
+                const avgTokensEl = document.getElementById('avg-tokens');
+                
+                if (totalCallsEl) totalCallsEl.textContent = data.totalCalls || 0;
+                if (totalTokensEl) totalTokensEl.textContent = data.totalTokens || 0;
+                if (uniqueUsersEl) uniqueUsersEl.textContent = data.uniqueUsers || 0;
+                if (avgTokensEl) {
+                    const avg = data.totalCalls > 0 ? Math.round((data.totalTokens || 0) / data.totalCalls) : 0;
+                    avgTokensEl.textContent = avg;
+                }
+                
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (contentEl) contentEl.style.display = 'block';
+            } else {
+                throw new Error(response.error || 'Failed to load analytics');
+            }
+        } catch (error) {
+            console.error('Analytics error:', error);
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (errorEl) {
+                errorEl.style.display = 'block';
+                errorEl.textContent = error.message;
+            }
+        }
+    }
+
+    /**
+     * Load top users data
+     */
+    async loadTopUsers() {
+        const period = document.getElementById('users-period')?.value || '30';
+        const loadingEl = document.getElementById('users-loading');
+        const errorEl = document.getElementById('users-error');
+        const contentEl = document.getElementById('users-content');
+        const tbody = document.getElementById('top-users-tbody');
+
+        if (loadingEl) loadingEl.style.display = 'block';
+        if (errorEl) errorEl.style.display = 'none';
+        if (contentEl) contentEl.style.display = 'none';
+
+        try {
+            const response = await API.makeRequest(`/api/admin/analytics/users?period=${period}&limit=10`);
+            
+            if (response.success) {
+                const users = response.data;
+                
+                if (tbody) {
+                    tbody.innerHTML = '';
+                    users.forEach(user => {
+                        const row = document.createElement('tr');
+                        const avgTokens = user.apiCalls > 0 ? Math.round(user.tokensUsed / user.apiCalls) : 0;
+                        const lastActive = user.lastActivity ? new Date(user.lastActivity).toLocaleDateString() : 'Never';
+                        
+                        row.innerHTML = `
+                            <td>${user.username || 'Unknown'}</td>
+                            <td>${user.apiCalls}</td>
+                            <td>${user.tokensUsed}</td>
+                            <td>${avgTokens}</td>
+                            <td>${lastActive}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+                
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (contentEl) contentEl.style.display = 'block';
+            } else {
+                throw new Error(response.error || 'Failed to load top users');
+            }
+        } catch (error) {
+            console.error('Top users error:', error);
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (errorEl) {
+                errorEl.style.display = 'block';
+                errorEl.textContent = error.message;
+            }
+        }
+    }
 }
+
+// Global functions for HTML event handlers
+window.loadAnalytics = function() {
+    if (window.Auth) {
+        window.Auth.loadAnalytics();
+    }
+};
+
+window.loadTopUsers = function() {
+    if (window.Auth) {
+        window.Auth.loadTopUsers();
+    }
+};
 
 /**
  * Auth Guard Mixin
