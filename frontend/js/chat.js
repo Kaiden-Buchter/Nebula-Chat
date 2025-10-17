@@ -284,15 +284,12 @@ class ChatManager {
             UI.showLoading('Loading chat...');
             console.log(`📖 Loading chat: ${chatId}`);
             
-            // First check if we have the chat locally
-            let chatData = this.chats.get(chatId);
+            // Always fetch full chat data from server (local cache only has summaries)
+            console.log('💾 Fetching full chat data from server...');
+            const chatData = await API.getChat(chatId);
             
-            // If not local, try to fetch from server
-            if (!chatData) {
-                console.log('💾 Chat not in local cache, fetching from server...');
-                chatData = await API.getChat(chatId);
-                this.chats.set(chatId, chatData);
-            }
+            // Update local cache with full chat data
+            this.chats.set(chatId, chatData);
             
             console.log('📋 Chat data loaded:', chatData);
             console.log('💬 Messages in chat:', chatData.messages?.length || 0, chatData.messages);
