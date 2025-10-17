@@ -276,9 +276,17 @@ class ApiClient {
      * @param {string} chatId - Chat ID
      * @returns {Promise<Object>} Chat data with messages
      */
+    /**
+     * Get specific chat
+     * @param {string} chatId - Chat ID
+     * @returns {Promise<Object>} Chat data
+     */
     async getChat(chatId) {
         try {
+            console.log(`🔍 API: Fetching chat ${chatId} from server...`);
             const response = await this.makeRequest(`${CONFIG.ENDPOINTS.CHATS}/${chatId}`);
+            console.log(`📋 API: Server returned chat data:`, response.data);
+            console.log(`💬 API: Messages in server response:`, response.data?.messages?.length || 0, response.data?.messages);
             return response.data;
         } catch (error) {
             console.error('Failed to fetch chat:', error);
