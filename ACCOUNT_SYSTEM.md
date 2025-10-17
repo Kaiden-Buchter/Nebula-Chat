@@ -124,6 +124,26 @@ The backend now uses these environment variables:
 
 **⚠️ Important**: Change the admin password by updating `ADMIN_PASSWORD` in your Cloudflare Worker environment variables if you want better security.
 
+## 🔧 Troubleshooting
+
+### CORS Errors
+If you get CORS errors when trying to create accounts:
+1. Make sure your local server URL is included in `ALLOWED_ORIGINS`
+2. Current allowed origins: `https://detailingzone.org,http://127.0.0.1:5500,https://kaiden-buchter.github.io/Nebula-Chat/`
+3. If using a different port, update the backend configuration
+
+### Username Field Not Visible
+If the username field doesn't appear in the login form:
+1. Clear your browser cache
+2. Hard refresh the page (Ctrl+F5 or Cmd+Shift+R)
+3. Check browser developer console for any JavaScript errors
+
+### Can't Create Admin Account
+If the admin account doesn't auto-create:
+1. Check that `ADMIN_PASSWORD` is set in your environment variables
+2. The admin account is created on first backend startup
+3. Try making any API call to trigger initialization
+
 ---
 
 Your chat history is now safe and tied to your account! No more losing conversations when you log out. Enjoy your new persistent, secure chat experience! 🎉

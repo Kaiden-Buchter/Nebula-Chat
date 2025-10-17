@@ -177,12 +177,16 @@ class AuthManager {
             this.authModal.classList.add('hidden');
             document.getElementById('app')?.classList.remove('hidden');
             
-            // Show admin panel button if user is admin
-            if (this.currentUser && this.currentUser.role === 'admin') {
-                const adminBtn = document.getElementById('admin-panel-btn');
-                if (adminBtn) {
+            // Handle admin panel button visibility
+            const adminBtn = document.getElementById('admin-panel-btn');
+            if (adminBtn) {
+                if (this.currentUser && this.currentUser.role === 'admin') {
+                    // Show admin panel button for admin users only
                     adminBtn.style.display = 'block';
                     adminBtn.addEventListener('click', this.showAdminPanel.bind(this));
+                } else {
+                    // Hide admin panel button for non-admin users
+                    adminBtn.style.display = 'none';
                 }
             }
             
@@ -391,7 +395,7 @@ class AuthManager {
             }
 
             usersList.innerHTML = users.map(user => `
-                <div class="user-item">
+                <div class="user-item" data-user-id="${user.id}">
                     <div class="user-info">
                         <strong>${user.displayName || user.username}</strong>
                         <span class="username">@${user.username}</span>
@@ -403,11 +407,104 @@ class AuthManager {
                         ${user.lastLoginAt ? `<span class="last-login">Last login: ${new Date(user.lastLoginAt).toLocaleDateString()}</span>` : ''}
                         <span class="status status-${user.isActive ? 'active' : 'inactive'}">${user.isActive ? 'Active' : 'Inactive'}</span>
                     </div>
+                    <div class="user-actions">
+                        ${user.username !== 'admin' ? `
+                            ${user.isActive ? 
+                                `<button class="btn-warning btn-suspend" data-user-id="${user.id}" data-username="${user.username}">
+                                    <i class="fas fa-pause"></i> Suspend
+                                </button>` : 
+                                `<button class="btn-success btn-activate" data-user-id="${user.id}" data-username="${user.username}">
+                                    <i class="fas fa-play"></i> Activate
+                                </button>`
+                            }
+                            <button class="btn-danger btn-delete" data-user-id="${user.id}" data-username="${user.username}">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        ` : '<span class="admin-badge">Protected Admin Account</span>'}
+                    </div>
                 </div>
             `).join('');
 
+            // Add event listeners for action buttons
+            this.attachUserActionListeners();
+
         } catch (error) {
             usersList.innerHTML = '<div class="error">Failed to load users</div>';
+        }
+    }
+
+    /**
+     * Attach event listeners to user action buttons
+     */
+    attachUserActionListeners() {
+        // Suspend/Activate buttons
+        document.querySelectorAll('.btn-suspend, .btn-activate').forEach(btn => {
+            btn.addEventListener('click', this.handleUserToggle.bind(this));
+        });
+
+        // Delete buttons
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', this.handleUserDelete.bind(this));
+        });
+    }
+
+    /**
+     * Handle user suspend/activate toggle
+     */
+    async handleUserToggle(event) {
+        const userId = event.currentTarget.dataset.userId;
+        const username = event.currentTarget.dataset.username;
+        const isSuspend = event.currentTarget.classList.contains('btn-suspend');
+        
+        const action = isSuspend ? 'suspend' : 'activate';
+        const confirmed = await UI.confirm(
+            `Are you sure you want to ${action} user "${username}"?`,
+            `${action.charAt(0).toUpperCase() + action.slice(1)} User`
+        );
+
+        if (!confirmed) return;
+
+        try {
+            const response = await API.toggleUserStatus(userId, !isSuspend);
+            
+            if (response.success) {
+                UI.showToast(`User "${username}" ${action}d successfully`, 'success');
+                this.loadUsers(); // Refresh the users list
+            } else {
+                UI.showToast(response.error || `Failed to ${action} user`, 'error');
+            }
+        } catch (error) {
+            UI.showToast(`Failed to ${action} user`, 'error');
+        }
+    }
+
+    /**
+     * Handle user deletion
+     */
+    async handleUserDelete(event) {
+        const userId = event.currentTarget.dataset.userId;
+        const username = event.currentTarget.dataset.username;
+        
+        const confirmed = await UI.confirm(
+            `Are you sure you want to DELETE user "${username}"? This action cannot be undone and will permanently remove all their chats and data.`,
+            'Delete User',
+            'Delete',
+            'Cancel'
+        );
+
+        if (!confirmed) return;
+
+        try {
+            const response = await API.deleteUser(userId);
+            
+            if (response.success) {
+                UI.showToast(`User "${username}" deleted successfully`, 'success');
+                this.loadUsers(); // Refresh the users list
+            } else {
+                UI.showToast(response.error || 'Failed to delete user', 'error');
+            }
+        } catch (error) {
+            UI.showToast('Failed to delete user', 'error');
         }
     }
 

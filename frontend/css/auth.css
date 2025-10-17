@@ -416,6 +416,72 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: var(--radius-lg);
     margin-bottom: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.user-actions {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.user-actions button {
+    padding: var(--space-1) var(--space-3);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.btn-warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.btn-warning:hover {
+    background: rgba(245, 158, 11, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.btn-success:hover {
+    background: rgba(34, 197, 94, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+    background: rgba(239, 68, 68, 0.3);
+    transform: translateY(-1px);
+}
+
+.admin-badge {
+    padding: var(--space-1) var(--space-3);
+    background: rgba(124, 58, 237, 0.2);
+    color: #7c3aed;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    border: 1px solid rgba(124, 58, 237, 0.3);
 }
 
 .user-info {

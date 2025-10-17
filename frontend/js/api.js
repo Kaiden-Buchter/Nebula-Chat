@@ -425,6 +425,42 @@ class ApiClient {
     }
 
     /**
+     * Toggle user active status (admin only)
+     * @param {string} userId - User ID
+     * @param {boolean} isActive - New active status
+     * @returns {Promise<Object>} Toggle response
+     */
+    async toggleUserStatus(userId, isActive) {
+        try {
+            const response = await this.makeRequest(`/api/admin/users/${userId}/status`, {
+                method: 'PATCH',
+                body: JSON.stringify({ isActive })
+            });
+            return response;
+        } catch (error) {
+            console.error('Failed to toggle user status:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Delete user account (admin only)
+     * @param {string} userId - User ID
+     * @returns {Promise<Object>} Delete response
+     */
+    async deleteUser(userId) {
+        try {
+            const response = await this.makeRequest(`/api/admin/users/${userId}`, {
+                method: 'DELETE'
+            });
+            return response;
+        } catch (error) {
+            console.error('Failed to delete user:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Check if user is authenticated
      * @returns {boolean} Authentication status
      */
