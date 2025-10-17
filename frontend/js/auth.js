@@ -78,6 +78,17 @@ class AuthManager {
         
         if (API && API.isAuthenticated()) {
             this.isAuthenticated = true;
+            
+            // Get current user info for admin button visibility
+            try {
+                const userResponse = await API.getCurrentUser();
+                if (userResponse && userResponse.success) {
+                    this.currentUser = userResponse.data;
+                }
+            } catch (error) {
+                console.warn('Could not fetch user info on page load:', error);
+            }
+            
             this.showApp();
         } else {
             this.isAuthenticated = false;

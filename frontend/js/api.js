@@ -393,6 +393,20 @@ class ApiClient {
     }
 
     /**
+     * Get current user profile
+     * @returns {Promise<Object>} Current user data
+     */
+    async getCurrentUser() {
+        try {
+            const response = await this.makeRequest('/api/me');
+            return response;
+        } catch (error) {
+            console.error('Failed to fetch current user:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Get all users (admin only)
      * @returns {Promise<Array>} Array of users
      */
