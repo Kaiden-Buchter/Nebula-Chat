@@ -217,6 +217,66 @@
     transition: transform var(--transition-fast);
 }
 
+/* Standalone submit button */
+.btn-submit {
+    width: 100%;
+    background: var(--gradient-primary);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5) var(--space-6);
+    color: var(--text-primary);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-glass);
+    backdrop-filter: var(--blur-md);
+    margin-bottom: var(--space-4);
+}
+
+.btn-submit::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-glass-hover);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.btn-submit:hover {
+    background: linear-gradient(135deg, var(--accent-secondary), var(--accent-tertiary));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow), var(--shadow-glass-strong);
+    border-color: rgba(124, 58, 237, 0.5);
+}
+
+.btn-submit:hover::before {
+    opacity: 1;
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-glass);
+}
+
+.btn-submit i {
+    font-size: var(--font-size-base);
+    transition: transform var(--transition-fast);
+}
+
+.btn-submit:hover i {
+    transform: scale(1.1);
+}
+
 .input-group button:hover i {
     transform: translateX(2px);
 }
@@ -257,6 +317,15 @@
 }
 
 .auth-form.loading .input-group button i {
+    animation: spin 1s linear infinite;
+}
+
+.auth-form.loading .btn-submit {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.auth-form.loading .btn-submit i {
     animation: spin 1s linear infinite;
 }
 
@@ -317,6 +386,15 @@
     }
     100% {
         box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
     }
 }
 
