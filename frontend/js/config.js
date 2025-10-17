@@ -1,6 +1,6 @@
 // Configuration settings for Nebula Chat
 const CONFIG = {
-    // Backend API endpoint - Update this to your Cloudflare Worker URL
+    // Backend API endpoint - Update this to your actual backend URL
     API_BASE_URL: 'https://detailingzone.org',
     
     // API endpoints
