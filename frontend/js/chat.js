@@ -392,12 +392,14 @@ class ChatManager {
     }
 
     /**
-     * Format message text with basic markdown
+     * Format message text with enhanced markdown
      * @param {string} text - Message text
      * @returns {string} Formatted HTML
      */
     formatMessageText(text) {
-        return Utils.parseSimpleMarkdown(Utils.escapeHtml(text));
+        // Escape HTML first, then apply markdown
+        const escapedText = Utils.escapeHtml(text);
+        return Utils.parseSimpleMarkdown(escapedText);
     }
 
     /**

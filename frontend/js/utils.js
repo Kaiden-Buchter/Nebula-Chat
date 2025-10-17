@@ -273,15 +273,93 @@ const Utils = {
 
     /**
      * Parse markdown-like formatting in text
-     * @param {string} text - Text to parse
-     * @returns {string} HTML string with basic formatting
+     * @param {string} text - Text to parse (should already be HTML-escaped)
+     * @returns {string} HTML string with advanced formatting
      */
     parseSimpleMarkdown(text) {
+        // First handle code blocks (must be done before other formatting)
+        text = text.replace(/```(\w+)?\n([\s\S]*?)\n```/g, (match, lang, code) => {
+            const language = lang || '';
+            const trimmedCode = code.trim();
+            return `<pre class="code-block" data-language="${language}"><code>${trimmedCode}</code></pre>`;
+        });
+        
+        // Handle single-line code blocks without language
+        text = text.replace(/```([\s\S]*?)```/g, (match, code) => {
+            const trimmedCode = code.trim();
+            return `<pre class="code-block"><code>${trimmedCode}</code></pre>`;
+        });
+        
         return text
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
-            .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic
-            .replace(/`(.*?)`/g, '<code>$1</code>') // Inline code
-            .replace(/\n/g, '<br>'); // Line breaks
+            // Headers (only on new lines) - support all 6 levels
+            .replace(/^###### (.*$)/gm, '<h6 class="markdown-h6">$1</h6>')
+            .replace(/^##### (.*$)/gm, '<h5 class="markdown-h5">$1</h5>')
+            .replace(/^#### (.*$)/gm, '<h4 class="markdown-h4">$1</h4>')
+            .replace(/^### (.*$)/gm, '<h3 class="markdown-h3">$1</h3>')
+            .replace(/^## (.*$)/gm, '<h2 class="markdown-h2">$1</h2>')
+            .replace(/^# (.*$)/gm, '<h1 class="markdown-h1">$1</h1>')
+            
+            // Horizontal lines
+            .replace(/^(---+|___+|\*\*\*+)$/gm, '<hr class="markdown-hr">')
+            
+            // Bold and italic combinations (must be done before individual bold/italic)
+            .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
+            .replace(/\_\_\_(.*?)\_\_\_/g, '<strong><em>$1</em></strong>')
+            
+            // Bold text: **text** or __text__
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/__(.*?)__/g, '<strong>$1</strong>')
+            
+            // Italic text: *text* or _text_ (with negative lookbehind/ahead to avoid conflicts)
+            .replace(/(?<!\*)\*([^*\n]+?)\*(?!\*)/g, '<em>$1</em>')
+            .replace(/(?<!_)_([^_\n]+?)_(?!_)/g, '<em>$1</em>')
+            
+            // Strikethrough: ~~text~~
+            .replace(/~~(.*?)~~/g, '<del>$1</del>')
+            
+            // Task lists (must be done before regular lists)
+            .replace(/^(\s*)- \[x\]\s+(.*$)/gm, '$1<li class="markdown-task-item completed"><input type="checkbox" checked disabled> $2</li>')
+            .replace(/^(\s*)- \[ \]\s+(.*$)/gm, '$1<li class="markdown-task-item"><input type="checkbox" disabled> $2</li>')
+            
+            // Ordered lists
+            .replace(/^(\s*)(\d+)\.\s+(.*$)/gm, '$1<li class="markdown-ol-item">$3</li>')
+            
+            // Unordered lists with nesting support
+            .replace(/^(\s*)[-*+]\s+(.*$)/gm, (match, indent, content) => {
+                const level = Math.floor(indent.length / 2);
+                return `${indent}<li class="markdown-li" data-level="${level}">${content}</li>`;
+            })
+            
+            // Wrap consecutive list items in appropriate list tags
+            .replace(/((?:<li class="markdown-li"[^>]*>.*<\/li>\s*)+)/g, (match) => {
+                return `<ul class="markdown-ul">${match}</ul>`;
+            })
+            .replace(/((?:<li class="markdown-ol-item">.*<\/li>\s*)+)/g, (match) => {
+                return `<ol class="markdown-ol">${match}</ol>`;
+            })
+            .replace(/((?:<li class="markdown-task-item[^>]*>.*<\/li>\s*)+)/g, (match) => {
+                return `<ul class="markdown-task-list">${match}</ul>`;
+            })
+            
+            // Blockquotes: > text (handle multiple lines and nesting)
+            .replace(/^(>\s.*(?:\n>\s.*)*)/gm, (match) => {
+                const lines = match.split('\n').map(line => {
+                    return line.replace(/^>\s/, '').trim();
+                }).join('<br>');
+                return `<blockquote class="markdown-quote">${lines}</blockquote>`;
+            })
+            
+            // Images: ![alt](url)
+            .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="markdown-image" loading="lazy">')
+            
+            // Links: [text](url)
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="markdown-link" target="_blank" rel="noopener noreferrer">$1</a>')
+            
+            // Inline code: `code` (must be done after code blocks)
+            .replace(/`([^`\n]+?)`/g, '<code class="inline-code">$1</code>')
+            
+            // Line breaks
+            .replace(/\n/g, '<br>');
     },
 
     /**
