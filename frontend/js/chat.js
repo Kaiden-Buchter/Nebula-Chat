@@ -392,14 +392,23 @@ class ChatManager {
     }
 
     /**
-     * Format message text with enhanced markdown
+     * Format message text with enhanced markdown and math
      * @param {string} text - Message text
      * @returns {string} Formatted HTML
      */
     formatMessageText(text) {
         // Escape HTML first, then apply markdown
         const escapedText = Utils.escapeHtml(text);
-        return Utils.parseSimpleMarkdown(escapedText);
+        const markdownHTML = Utils.parseSimpleMarkdown(escapedText);
+        
+        // Create a temporary element to process math
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = markdownHTML;
+        
+        // Render math expressions
+        Utils.renderMath(tempDiv);
+        
+        return tempDiv.innerHTML;
     }
 
     /**

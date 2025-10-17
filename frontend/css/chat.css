@@ -856,3 +856,67 @@ em {
     font-style: italic;
     color: var(--text-secondary);
 }
+
+/* Math Expression Styles */
+.math-block {
+    display: block;
+    margin: var(--space-4) 0;
+    padding: var(--space-3);
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: var(--radius-md);
+    text-align: center;
+    overflow-x: auto;
+}
+
+.math-inline {
+    display: inline;
+    padding: 2px 4px;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: var(--radius-sm);
+    margin: 0 2px;
+}
+
+/* KaTeX font size adjustments */
+.math-block .katex {
+    font-size: 1.2em;
+}
+
+.math-inline .katex {
+    font-size: 1em;
+}
+
+/* Math error styling */
+.katex-error {
+    color: var(--error) !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 1px solid rgba(239, 68, 68, 0.2) !important;
+    border-radius: var(--radius-sm);
+    padding: 2px 4px;
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+}
+
+/* Math rendering loading state */
+.math-loading {
+    background: rgba(139, 92, 246, 0.05);
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+/* Responsive math */
+@media (max-width: 768px) {
+    .math-block {
+        font-size: 0.9em;
+        padding: var(--space-2);
+        margin: var(--space-3) 0;
+    }
+    
+    .math-block .katex {
+        font-size: 1em;
+    }
+    
+    .math-inline .katex {
+        font-size: 0.9em;
+    }
+}

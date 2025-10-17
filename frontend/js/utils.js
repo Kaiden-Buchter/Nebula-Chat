@@ -277,7 +277,31 @@ const Utils = {
      * @returns {string} HTML string with advanced formatting
      */
     parseSimpleMarkdown(text) {
-        // First handle code blocks (must be done before other formatting)
+        // First handle math expressions (must be done before other formatting)
+        // Block math: $$...$$
+        text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
+            const trimmedMath = math.trim();
+            return `<div class="math-block" data-math="${this.escapeHtml(trimmedMath)}">$$${trimmedMath}$$</div>`;
+        });
+        
+        // Inline math: $...$
+        text = text.replace(/\$([^$\n]+?)\$/g, (match, math) => {
+            const trimmedMath = math.trim();
+            return `<span class="math-inline" data-math="${this.escapeHtml(trimmedMath)}">$${trimmedMath}$</span>`;
+        });
+        
+        // LaTeX-style math expressions: \[...\] and \(...\)
+        text = text.replace(/\\\[([\s\S]*?)\\\]/g, (match, math) => {
+            const trimmedMath = math.trim();
+            return `<div class="math-block" data-math="${this.escapeHtml(trimmedMath)}">\\[${trimmedMath}\\]</div>`;
+        });
+        
+        text = text.replace(/\\\(([\s\S]*?)\\\)/g, (match, math) => {
+            const trimmedMath = math.trim();
+            return `<span class="math-inline" data-math="${this.escapeHtml(trimmedMath)}">\\(${trimmedMath}\\)</span>`;
+        });
+
+        // Then handle code blocks (must be done before other formatting)
         text = text.replace(/```(\w+)?\n([\s\S]*?)\n```/g, (match, lang, code) => {
             const language = lang || '';
             const trimmedCode = code.trim();
@@ -370,6 +394,79 @@ const Utils = {
     isValidEmail(email) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
+    },
+
+    /**
+     * Render math expressions using KaTeX
+     * @param {HTMLElement} element - Element containing math expressions
+     */
+    renderMath(element) {
+        if (typeof window.katex === 'undefined') {
+            console.warn('KaTeX not loaded - math expressions will not be rendered');
+            return;
+        }
+
+        try {
+            // Render block math
+            const mathBlocks = element.querySelectorAll('.math-block');
+            mathBlocks.forEach(block => {
+                const math = block.getAttribute('data-math');
+                if (math) {
+                    try {
+                        block.classList.add('math-loading');
+                        const rendered = window.katex.renderToString(math, {
+                            displayMode: true,
+                            throwOnError: false,
+                            errorColor: '#ef4444',
+                            macros: {
+                                "\\RR": "\\mathbb{R}",
+                                "\\NN": "\\mathbb{N}",
+                                "\\ZZ": "\\mathbb{Z}",
+                                "\\QQ": "\\mathbb{Q}",
+                                "\\CC": "\\mathbb{C}"
+                            }
+                        });
+                        block.innerHTML = rendered;
+                        block.classList.remove('math-loading');
+                    } catch (error) {
+                        console.error('Math rendering error:', error);
+                        block.innerHTML = `<span class="katex-error">Error: ${math}</span>`;
+                        block.classList.remove('math-loading');
+                    }
+                }
+            });
+
+            // Render inline math
+            const mathInlines = element.querySelectorAll('.math-inline');
+            mathInlines.forEach(inline => {
+                const math = inline.getAttribute('data-math');
+                if (math) {
+                    try {
+                        inline.classList.add('math-loading');
+                        const rendered = window.katex.renderToString(math, {
+                            displayMode: false,
+                            throwOnError: false,
+                            errorColor: '#ef4444',
+                            macros: {
+                                "\\RR": "\\mathbb{R}",
+                                "\\NN": "\\mathbb{N}",
+                                "\\ZZ": "\\mathbb{Z}",
+                                "\\QQ": "\\mathbb{Q}",
+                                "\\CC": "\\mathbb{C}"
+                            }
+                        });
+                        inline.innerHTML = rendered;
+                        inline.classList.remove('math-loading');
+                    } catch (error) {
+                        console.error('Math rendering error:', error);
+                        inline.innerHTML = `<span class="katex-error">Error: ${math}</span>`;
+                        inline.classList.remove('math-loading');
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('KaTeX rendering failed:', error);
+        }
     },
 
     /**
