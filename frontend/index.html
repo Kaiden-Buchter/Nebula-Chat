@@ -149,7 +149,8 @@
                 <button class="tab-btn" data-tab="manage-users">Manage Users</button>
             </div>
 
-            <div id="analytics" class="tab-content active">
+            <div class="admin-content-wrapper">
+                <div id="analytics" class="tab-content active">
                 <div class="analytics-section">
                     <h3>System Overview</h3>
                     <div class="period-selector">
@@ -242,13 +243,14 @@
                 </form>
             </div>
 
-            <div id="manage-users" class="tab-content">
-                <div id="users-list" class="users-list">
-                    <div class="loading">Loading users...</div>
+                <div id="manage-users" class="tab-content">
+                    <div id="users-list" class="users-list">
+                        <div class="loading">Loading users...</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="auth-footer">
+            <div class="modal-actions">
                 <button id="close-admin-modal" class="btn-secondary">Close</button>
             </div>
         </div>
