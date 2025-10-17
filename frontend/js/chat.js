@@ -141,7 +141,6 @@ class ChatManager {
      * Load all chats
      */
     async loadChats() {
-        console.log('🔄 Loading chats...');
         try {
             UI.showLoading('Loading chats...');
             
@@ -149,19 +148,12 @@ class ChatManager {
             await new Promise(resolve => setTimeout(resolve, 200));
             
             // Check if we're authenticated first
-            console.log('🔍 Auth check - Auth exists:', !!Auth);
-            console.log('🔍 Auth check - isUserAuthenticated method:', !!Auth?.isUserAuthenticated);
-            console.log('🔍 Auth check - isUserAuthenticated result:', Auth?.isUserAuthenticated());
-            
             if (!Auth || !Auth.isUserAuthenticated || !Auth.isUserAuthenticated()) {
-                console.log('❌ Not authenticated, skipping chat loading');
                 this.showWelcomeMessage();
                 return;
             }
             
-            console.log('✅ Authenticated, proceeding to load chats...');
             const chats = await API.getChats();
-            console.log(`📂 Loaded ${chats.length} chats:`, chats);
             
             this.chats.clear();
             chats.forEach(chat => {
@@ -173,14 +165,12 @@ class ChatManager {
             // Load the most recent chat or show welcome
             if (chats.length > 0) {
                 const recentChat = chats.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
-                console.log('📖 Loading most recent chat:', recentChat.id);
                 await this.loadChat(recentChat.id);
             } else {
-                console.log('📝 No chats found, showing welcome message');
                 this.showWelcomeMessage();
             }
         } catch (error) {
-            console.error('❌ Failed to load chats:', error);
+            console.error('Failed to load chats:', error);
             UI.showToast(`Failed to load chats: ${error.message}`, 'error');
             this.showWelcomeMessage();
         } finally {
@@ -282,17 +272,12 @@ class ChatManager {
 
         try {
             UI.showLoading('Loading chat...');
-            console.log(`📖 Loading chat: ${chatId}`);
             
             // Always fetch full chat data from server (local cache only has summaries)
-            console.log('💾 Fetching full chat data from server...');
             const chatData = await API.getChat(chatId);
             
             // Update local cache with full chat data
             this.chats.set(chatId, chatData);
-            
-            console.log('📋 Chat data loaded:', chatData);
-            console.log('💬 Messages in chat:', chatData.messages?.length || 0, chatData.messages);
             
             this.currentChatId = chatId;
             this.currentChat = chatData;
@@ -349,7 +334,6 @@ class ChatManager {
      * @param {Array} messages - Array of messages
      */
     renderMessages(messages = []) {
-        console.log('🎨 Rendering messages:', messages.length, messages);
         if (!this.messagesContainer) {
             console.error('❌ Messages container not found!');
             return;
@@ -358,20 +342,16 @@ class ChatManager {
         this.messagesContainer.innerHTML = '';
 
         if (messages.length === 0) {
-            console.log('📭 No messages to display, showing empty state');
             this.showEmptyState();
             return;
         }
 
-        console.log('📝 Adding messages to UI...');
         messages.forEach((message, index) => {
-            console.log(`📝 Adding message ${index + 1}:`, message);
             this.addMessageToUI(message, false);
         });
 
         // Scroll to bottom
         UI.scrollToBottom(this.messagesContainer, true);
-        console.log('✅ Messages rendered successfully');
     }
 
     /**

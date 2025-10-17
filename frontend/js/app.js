@@ -16,8 +16,6 @@ class NebulaApp {
      * Initialize the application
      */
     init() {
-        console.log(`🌟 Nebula Chat v${this.version} - Starting up...`);
-        
         this.bindGlobalEvents();
         this.setupErrorHandling();
         this.setupPerformanceMonitoring();
@@ -35,14 +33,10 @@ class NebulaApp {
      * Handle DOM ready event
      */
     onDOMReady() {
-        console.log('📱 DOM ready - Initializing modules...');
-        
         this.initializeModules();
         this.setupKeyboardShortcuts();
         this.setupServiceWorker();
         this.isInitialized = true;
-        
-        console.log('✅ Nebula Chat initialized successfully');
     }
 
     /**
@@ -88,7 +82,6 @@ class NebulaApp {
         this.setupHealthChecks();
         
         // Trigger app ready event to initialize chat loading
-        console.log('🚀 Triggering app initialization...');
         document.dispatchEvent(new Event('app-ready'));
     }
 
@@ -197,7 +190,6 @@ class NebulaApp {
         //             console.warn('🔧 Service Worker registration failed:', error);
         //         });
         // }
-        console.log('🔧 Service Worker registration skipped');
     }
 
     /**
@@ -259,7 +251,7 @@ class NebulaApp {
                 setTimeout(() => {
                     const timing = performance.timing;
                     const loadTime = timing.loadEventEnd - timing.navigationStart;
-                    console.log(`⚡ Page load time: ${loadTime}ms`);
+                    // Performance metrics tracked silently
                 }, 0);
             });
         }
@@ -293,7 +285,6 @@ class NebulaApp {
      * Handle online event
      */
     handleOnline() {
-        console.log('🌐 Connection restored');
         UI.showToast('Connection restored', 'success');
     }
 
@@ -301,7 +292,6 @@ class NebulaApp {
      * Handle offline event
      */
     handleOffline() {
-        console.log('🌐 Connection lost');
         UI.showToast('You are offline. Some features may not work.', 'warning');
     }
 
@@ -324,10 +314,9 @@ class NebulaApp {
      */
     handleVisibilityChange() {
         if (document.hidden) {
-            console.log('👁️ App hidden');
+            // App hidden
         } else {
-            console.log('👁️ App visible');
-            // Refresh data if needed
+            // App visible - refresh data if needed
             if (Chat && typeof Chat.refreshCurrentChat === 'function') {
                 Chat.refreshCurrentChat();
             }
@@ -504,7 +493,6 @@ class NebulaApp {
      */
     enableDebugMode() {
         window.DEBUG = true;
-        console.log('🐛 Debug mode enabled');
         
         // Add debug info to console
         console.table(this.getAppInfo());
@@ -531,7 +519,6 @@ const NebulaApp_Instance = new NebulaApp();
 if (CONFIG.IS_DEVELOPMENT) {
     window.NebulaApp = NebulaApp_Instance;
     window.enableDebug = () => NebulaApp_Instance.enableDebugMode();
-    console.log('🛠️ Development mode - Type enableDebug() to enable debug mode');
 }
 
 // Export for module use

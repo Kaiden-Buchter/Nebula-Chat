@@ -68,16 +68,10 @@ class AuthManager {
         // Wait a bit for API to initialize and load tokens
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        console.log('🔍 Checking authentication status...');
-        console.log('API exists:', !!API);
-        console.log('API.isAuthenticated:', API ? API.isAuthenticated() : 'API not available');
-        
         if (API && API.isAuthenticated()) {
-            console.log('✅ User is authenticated, showing app');
             this.isAuthenticated = true;
             this.showApp();
         } else {
-            console.log('❌ User not authenticated, showing login');
             this.isAuthenticated = false;
             this.showAuthModal();
         }
@@ -163,8 +157,6 @@ class AuthManager {
         if (this.authModal) {
             this.authModal.classList.add('hidden');
             document.getElementById('app')?.classList.remove('hidden');
-            
-            console.log('🔐 Authentication successful, showing app...');
             
             // Trigger app initialization
             document.dispatchEvent(new Event('app-ready'));
