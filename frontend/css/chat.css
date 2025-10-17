@@ -185,9 +185,51 @@
 
 .message-text {
     font-size: var(--font-size-base);
-    line-height: var(--line-height-relaxed);
+    line-height: var(--line-height-normal);
     word-wrap: break-word;
     white-space: pre-wrap;
+}
+
+.message-text br {
+    line-height: 0.5;
+    margin: 0;
+}
+
+/* Markdown elements within messages */
+.message-text h1, .message-text h2, .message-text h3, 
+.message-text h4, .message-text h5, .message-text h6 {
+    margin: var(--space-3) 0 var(--space-2) 0;
+    line-height: var(--line-height-tight);
+}
+
+.message-text p {
+    margin: var(--space-2) 0;
+    line-height: var(--line-height-normal);
+}
+
+.message-text ul, .message-text ol {
+    margin: var(--space-2) 0;
+    padding-left: var(--space-4);
+}
+
+.message-text li {
+    margin: var(--space-1) 0;
+    line-height: var(--line-height-normal);
+}
+
+.message-text blockquote {
+    margin: var(--space-2) 0;
+    padding-left: var(--space-3);
+    border-left: 3px solid var(--primary);
+    background: rgba(139, 92, 246, 0.05);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+}
+
+.message-text hr {
+    margin: var(--space-3) 0;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .message.user .message-text {
