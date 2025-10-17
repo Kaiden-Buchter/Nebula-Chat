@@ -196,15 +196,16 @@ class ApiClient {
     }
 
     /**
-     * Authenticate with password
-     * @param {string} password - Authentication password
+     * Authenticate with username and password
+     * @param {string} username - Username
+     * @param {string} password - Password
      * @returns {Promise<Object>} Authentication response
      */
-    async authenticate(password) {
+    async authenticate(username, password) {
         try {
             const response = await this.makeRequest(CONFIG.ENDPOINTS.AUTH, {
                 method: 'POST',
-                body: JSON.stringify({ password })
+                body: JSON.stringify({ username, password })
             }, false);
 
             if (response.success) {
@@ -369,6 +370,56 @@ class ApiClient {
             return response;
         } catch (error) {
             console.error('Health check failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Create a new user account (admin only)
+     * @param {Object} userData - User data
+     * @returns {Promise<Object>} Creation response
+     */
+    async createUserAccount(userData) {
+        try {
+            const response = await this.makeRequest('/api/admin/users', {
+                method: 'POST',
+                body: JSON.stringify(userData)
+            });
+            return response;
+        } catch (error) {
+            console.error('Failed to create user account:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get all users (admin only)
+     * @returns {Promise<Array>} Array of users
+     */
+    async getUsers() {
+        try {
+            const response = await this.makeRequest('/api/admin/users');
+            return response.data || [];
+        } catch (error) {
+            console.error('Failed to fetch users:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Register a new user with admin key
+     * @param {Object} userData - User registration data
+     * @returns {Promise<Object>} Registration response
+     */
+    async registerUser(userData) {
+        try {
+            const response = await this.makeRequest('/api/register', {
+                method: 'POST',
+                body: JSON.stringify(userData)
+            }, false);
+            return response;
+        } catch (error) {
+            console.error('Failed to register user:', error);
             throw error;
         }
     }

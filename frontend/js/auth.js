@@ -6,8 +6,10 @@
 class AuthManager {
     constructor() {
         this.isAuthenticated = false;
+        this.currentUser = null;
         this.authModal = null;
         this.authForm = null;
+        this.usernameInput = null;
         this.passwordInput = null;
         this.errorElement = null;
         
@@ -29,6 +31,7 @@ class AuthManager {
     bindElements() {
         this.authModal = document.getElementById('auth-modal');
         this.authForm = document.getElementById('auth-form');
+        this.usernameInput = document.getElementById('username');
         this.passwordInput = document.getElementById('password');
         this.errorElement = document.getElementById('auth-error');
     }
@@ -44,6 +47,11 @@ class AuthManager {
         if (this.passwordInput) {
             this.passwordInput.addEventListener('input', this.clearError.bind(this));
             this.passwordInput.addEventListener('keydown', this.handleKeyDown.bind(this));
+        }
+
+        if (this.usernameInput) {
+            this.usernameInput.addEventListener('input', this.clearError.bind(this));
+            this.usernameInput.addEventListener('keydown', this.handleKeyDown.bind(this));
         }
 
         // Listen for logout events
@@ -84,10 +92,18 @@ class AuthManager {
     async handleAuth(event) {
         event.preventDefault();
         
+        const username = this.usernameInput.value.trim();
         const password = this.passwordInput.value.trim();
         
+        if (!username) {
+            this.showError('Please enter a username');
+            this.usernameInput.focus();
+            return;
+        }
+
         if (!password) {
             this.showError('Please enter a password');
+            this.passwordInput.focus();
             return;
         }
 
@@ -95,19 +111,20 @@ class AuthManager {
         this.clearError();
 
         try {
-            const response = await API.authenticate(password);
+            const response = await API.authenticate(username, password);
             
             if (response.success) {
                 this.isAuthenticated = true;
+                this.currentUser = response.data.user;
                 this.setSuccess();
                 
                 // Small delay for success animation
                 setTimeout(() => {
                     this.showApp();
-                    UI.showToast('Welcome to Nebula Chat!', 'success');
+                    UI.showToast(`Welcome back, ${this.currentUser.displayName || this.currentUser.username}!`, 'success');
                 }, 500);
             } else {
-                this.showError(response.error || 'Invalid password');
+                this.showError(response.error || 'Invalid credentials');
             }
         } catch (error) {
             console.error('Authentication failed:', error);
@@ -128,6 +145,8 @@ class AuthManager {
         }
         
         this.isAuthenticated = false;
+        this.currentUser = null;
+        this.usernameInput.value = '';
         this.passwordInput.value = '';
         this.clearError();
         this.showAuthModal();
@@ -143,9 +162,9 @@ class AuthManager {
             this.authModal.classList.remove('hidden');
             document.getElementById('app')?.classList.add('hidden');
             
-            // Focus password input after animation
+            // Focus username input after animation
             setTimeout(() => {
-                this.passwordInput?.focus();
+                this.usernameInput?.focus();
             }, 300);
         }
     }
@@ -157,6 +176,15 @@ class AuthManager {
         if (this.authModal) {
             this.authModal.classList.add('hidden');
             document.getElementById('app')?.classList.remove('hidden');
+            
+            // Show admin panel button if user is admin
+            if (this.currentUser && this.currentUser.role === 'admin') {
+                const adminBtn = document.getElementById('admin-panel-btn');
+                if (adminBtn) {
+                    adminBtn.style.display = 'block';
+                    adminBtn.addEventListener('click', this.showAdminPanel.bind(this));
+                }
+            }
             
             // Trigger app initialization
             document.dispatchEvent(new Event('app-ready'));
@@ -172,9 +200,11 @@ class AuthManager {
         
         if (loading) {
             this.authForm.classList.add('loading');
+            this.usernameInput.disabled = true;
             this.passwordInput.disabled = true;
         } else {
             this.authForm.classList.remove('loading');
+            this.usernameInput.disabled = false;
             this.passwordInput.disabled = false;
         }
     }
@@ -202,7 +232,7 @@ class AuthManager {
             this.errorElement.classList.add('show');
             
             // Shake animation
-            this.passwordInput?.focus();
+            this.usernameInput?.focus();
         }
     }
 
@@ -229,6 +259,163 @@ class AuthManager {
      */
     forceLogout() {
         document.dispatchEvent(new Event('logout'));
+    }
+
+    /**
+     * Show admin panel
+     */
+    showAdminPanel() {
+        const adminModal = document.getElementById('admin-modal');
+        if (adminModal) {
+            adminModal.style.display = 'flex';
+            this.initializeAdminPanel();
+        }
+    }
+
+    /**
+     * Initialize admin panel
+     */
+    initializeAdminPanel() {
+        // Setup tab switching
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                
+                // Update active tab button
+                tabButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update active tab content
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === tabId) {
+                        content.classList.add('active');
+                    }
+                });
+
+                // Load users when switching to manage users tab
+                if (tabId === 'manage-users') {
+                    this.loadUsers();
+                }
+            });
+        });
+
+        // Setup create user form
+        const createUserForm = document.getElementById('create-user-form');
+        if (createUserForm) {
+            createUserForm.addEventListener('submit', this.handleCreateUser.bind(this));
+        }
+
+        // Setup close button
+        const closeBtn = document.getElementById('close-admin-modal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', this.hideAdminPanel.bind(this));
+        }
+    }
+
+    /**
+     * Hide admin panel
+     */
+    hideAdminPanel() {
+        const adminModal = document.getElementById('admin-modal');
+        if (adminModal) {
+            adminModal.style.display = 'none';
+        }
+    }
+
+    /**
+     * Handle create user form submission
+     */
+    async handleCreateUser(event) {
+        event.preventDefault();
+        
+        const username = document.getElementById('new-username').value.trim();
+        const password = document.getElementById('new-password').value.trim();
+        const displayName = document.getElementById('new-displayname').value.trim();
+        const email = document.getElementById('new-email').value.trim();
+        const errorElement = document.getElementById('create-user-error');
+
+        if (!username || !password) {
+            errorElement.textContent = 'Username and password are required';
+            errorElement.classList.add('show');
+            return;
+        }
+
+        try {
+            const response = await API.createUserAccount({
+                username,
+                password,
+                displayName: displayName || username,
+                email: email || null
+            });
+
+            if (response.success) {
+                UI.showToast(`User "${username}" created successfully!`, 'success');
+                
+                // Clear form
+                document.getElementById('create-user-form').reset();
+                errorElement.classList.remove('show');
+                
+                // Refresh users list if visible
+                if (document.getElementById('manage-users').classList.contains('active')) {
+                    this.loadUsers();
+                }
+            } else {
+                errorElement.textContent = response.error;
+                errorElement.classList.add('show');
+            }
+        } catch (error) {
+            errorElement.textContent = 'Failed to create user';
+            errorElement.classList.add('show');
+        }
+    }
+
+    /**
+     * Load and display users list
+     */
+    async loadUsers() {
+        const usersList = document.getElementById('users-list');
+        if (!usersList) return;
+
+        usersList.innerHTML = '<div class="loading">Loading users...</div>';
+
+        try {
+            const users = await API.getUsers();
+            
+            if (users.length === 0) {
+                usersList.innerHTML = '<div class="no-users">No users found</div>';
+                return;
+            }
+
+            usersList.innerHTML = users.map(user => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <strong>${user.displayName || user.username}</strong>
+                        <span class="username">@${user.username}</span>
+                        <span class="role role-${user.role}">${user.role}</span>
+                        ${user.email ? `<span class="email">${user.email}</span>` : ''}
+                    </div>
+                    <div class="user-meta">
+                        <span class="created">Created: ${new Date(user.createdAt).toLocaleDateString()}</span>
+                        ${user.lastLoginAt ? `<span class="last-login">Last login: ${new Date(user.lastLoginAt).toLocaleDateString()}</span>` : ''}
+                        <span class="status status-${user.isActive ? 'active' : 'inactive'}">${user.isActive ? 'Active' : 'Inactive'}</span>
+                    </div>
+                </div>
+            `).join('');
+
+        } catch (error) {
+            usersList.innerHTML = '<div class="error">Failed to load users</div>';
+        }
+    }
+
+    /**
+     * Get current user
+     */
+    getCurrentUser() {
+        return this.currentUser;
     }
 }
 

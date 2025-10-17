@@ -21,14 +21,15 @@
                     <i class="fas fa-star"></i>
                     <h2>Nebula Chat</h2>
                 </div>
-                <p>Enter your access code to continue</p>
+                <p>Sign in to your account</p>
             </div>
             
             <form id="auth-form" class="auth-form">
-                <!-- Hidden username field for accessibility and password manager compatibility -->
-                <input type="text" name="username" autocomplete="username" style="display: none;" value="nebula-user" readonly>
                 <div class="input-group">
-                    <input type="password" id="password" name="password" placeholder="Access Code" autocomplete="current-password" required>
+                    <input type="text" id="username" name="username" placeholder="Username" autocomplete="username" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" required>
                     <button type="submit">
                         <i class="fas fa-arrow-right"></i>
                     </button>
@@ -62,6 +63,10 @@
             </div>
             
             <div class="sidebar-footer">
+                <button id="admin-panel-btn" class="logout-btn" style="display: none;">
+                    <i class="fas fa-users-cog"></i>
+                    Admin Panel
+                </button>
                 <button id="logout-btn" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout
@@ -117,7 +122,60 @@
     </div>
 
     <!-- Toast Notifications -->
+        <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
+
+    <!-- Admin Panel Modal -->
+    <div id="admin-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="auth-header">
+                <div class="logo">
+                    <i class="fas fa-users-cog"></i>
+                    <h2>Admin Panel</h2>
+                </div>
+                <p>Manage user accounts</p>
+            </div>
+            
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="create-user">Create User</button>
+                <button class="tab-btn" data-tab="manage-users">Manage Users</button>
+            </div>
+
+            <div id="create-user" class="tab-content active">
+                <form id="create-user-form" class="auth-form">
+                    <div class="input-group">
+                        <input type="text" id="new-username" placeholder="Username" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="new-password" placeholder="Password" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="new-displayname" placeholder="Display Name">
+                    </div>
+                    <div class="input-group">
+                        <input type="email" id="new-email" placeholder="Email (optional)">
+                    </div>
+                    <div class="input-group">
+                        <button type="submit">
+                            <i class="fas fa-user-plus"></i>
+                            Create User
+                        </button>
+                    </div>
+                    <div id="create-user-error" class="error-message"></div>
+                </form>
+            </div>
+
+            <div id="manage-users" class="tab-content">
+                <div id="users-list" class="users-list">
+                    <div class="loading">Loading users...</div>
+                </div>
+            </div>
+
+            <div class="auth-footer">
+                <button id="close-admin-modal" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
