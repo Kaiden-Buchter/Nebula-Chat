@@ -607,11 +607,14 @@ class AuthManager {
                         const lastActive = user.lastActivity ? new Date(user.lastActivity).toLocaleDateString() : 'Never';
                         
                         row.innerHTML = `
-                            <td>${user.username || 'Unknown'}</td>
-                            <td>${user.apiCalls}</td>
-                            <td>${user.tokensUsed}</td>
-                            <td>${avgTokens}</td>
-                            <td>${lastActive}</td>
+                            <td class="user-info">
+                                <div class="user-name">${user.displayName || user.username || 'Unknown'}</div>
+                                <div class="user-id">${user.username || user.userId}</div>
+                            </td>
+                            <td><span class="mobile-label">API Calls: </span>${user.apiCalls}</td>
+                            <td><span class="mobile-label">Tokens: </span>${user.tokensUsed}</td>
+                            <td><span class="mobile-label">Avg: </span>${avgTokens}</td>
+                            <td class="hide-mobile"><span class="mobile-label">Last Active: </span>${lastActive}</td>
                         `;
                         tbody.appendChild(row);
                     });

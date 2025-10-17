@@ -77,12 +77,16 @@
     letter-spacing: 0.5px;
 }
 
+.responsive-table {
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
+    background: rgba(0, 0, 0, 0.2);
+}
+
 .user-table {
     width: 100%;
     border-collapse: collapse;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
+    min-width: 500px;
 }
 
 .user-table th,
@@ -99,6 +103,7 @@
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 .user-table td {
@@ -108,6 +113,85 @@
 
 .user-table tbody tr:hover {
     background: rgba(255, 255, 255, 0.05);
+}
+
+.user-info {
+    min-width: 150px;
+}
+
+.user-name {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.user-id {
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+    font-family: monospace;
+}
+
+.mobile-label {
+    display: none;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+    .responsive-table {
+        overflow-x: visible;
+    }
+    
+    .user-table,
+    .user-table thead,
+    .user-table tbody,
+    .user-table th,
+    .user-table td,
+    .user-table tr {
+        display: block;
+    }
+    
+    .user-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    .user-table tr {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--space-3);
+        padding: var(--space-3);
+        background: rgba(0, 0, 0, 0.2);
+    }
+    
+    .user-table td {
+        border: none;
+        padding: var(--space-2) 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .user-table td.user-info {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-bottom: var(--space-3);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: var(--space-2);
+    }
+    
+    .mobile-label {
+        display: inline;
+    }
+    
+    .hide-mobile {
+        display: none;
+    }
+    
+    .user-table {
+        min-width: unset;
+    }
 }
 
 @media (max-width: 768px) {

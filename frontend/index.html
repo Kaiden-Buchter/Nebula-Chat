@@ -197,19 +197,21 @@
                     <div id="users-error" class="error-message" style="display: none;"></div>
                     
                     <div id="users-content" style="display: none;">
-                        <table class="user-table">
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>API Calls</th>
-                                    <th>Tokens Used</th>
-                                    <th>Avg Tokens/Call</th>
-                                    <th>Last Active</th>
-                                </tr>
-                            </thead>
-                            <tbody id="top-users-tbody">
-                            </tbody>
-                        </table>
+                        <div class="responsive-table">
+                            <table class="user-table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>API Calls</th>
+                                        <th>Tokens</th>
+                                        <th>Avg/Call</th>
+                                        <th class="hide-mobile">Last Active</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top-users-tbody">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
