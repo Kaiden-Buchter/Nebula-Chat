@@ -1,7 +1,7 @@
 // Configuration settings for Nebula Chat
 const CONFIG = {
-    // Backend API endpoint - Update this to your actual backend URL
-    API_BASE_URL: 'https://nebula-chat-worker.knbuchtyy879.workers.dev',
+    // Backend API endpoint - Custom subdomain for cleaner URLs
+    API_BASE_URL: 'https://api.detailingzone.org',
     
     // API endpoints
     ENDPOINTS: {
