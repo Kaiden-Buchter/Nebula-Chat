@@ -448,31 +448,120 @@
         }
         
         async function checkAuthEndpoint() {
-            // Test auth endpoint with invalid credentials to check if it responds
-            await checkEndpoint('auth', `${API_BASE_URL}/api/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    username: 'test',
-                    password: 'test'
-                })
-            });
+            // Test auth endpoint with invalid credentials - 401 is expected and means it's working
+            const startTime = Date.now();
+            const indicator = document.getElementById('auth-indicator');
+            const status = document.getElementById('auth-status');
+            const responseTime = document.getElementById('auth-response-time');
+            const lastCheck = document.getElementById('auth-last-check');
+            
+            indicator.className = 'status-indicator checking';
+            status.textContent = 'Checking...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'test',
+                        password: 'test'
+                    })
+                });
+                
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+                
+                // For auth endpoint, 401 means it's working correctly
+                if (response.status === 401) {
+                    indicator.className = 'status-indicator online';
+                    status.textContent = '✅ Online (401 - Auth Required)';
+                    responseTime.textContent = `${duration}ms`;
+                    addLog(`Auth endpoint is healthy - correctly rejecting invalid credentials (${duration}ms)`, 'success');
+                } else if (response.ok) {
+                    indicator.className = 'status-indicator online';
+                    status.textContent = `✅ Online (${response.status})`;
+                    responseTime.textContent = `${duration}ms`;
+                    addLog(`Auth endpoint is healthy (${duration}ms)`, 'success');
+                } else {
+                    indicator.className = 'status-indicator offline';
+                    status.textContent = `❌ Error ${response.status}`;
+                    responseTime.textContent = `${duration}ms`;
+                    addLog(`Auth endpoint returned unexpected ${response.status} error`, 'error');
+                }
+                
+                lastCheck.textContent = new Date().toLocaleTimeString();
+                
+            } catch (error) {
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+                
+                indicator.className = 'status-indicator offline';
+                status.textContent = '❌ Offline';
+                responseTime.textContent = `${duration}ms`;
+                lastCheck.textContent = new Date().toLocaleTimeString();
+                
+                addLog(`Auth endpoint failed: ${error.message}`, 'error');
+            }
         }
         
         async function checkRegisterEndpoint() {
-            // Test register endpoint with invalid data to check if it responds
-            await checkEndpoint('register', `${API_BASE_URL}/api/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    username: '',
-                    password: ''
-                })
-            });
+            // Test register endpoint - 401 is expected and means it's working (needs admin key)
+            const startTime = Date.now();
+            const indicator = document.getElementById('register-indicator');
+            const status = document.getElementById('register-status');
+            const responseTime = document.getElementById('register-response-time');
+            const lastCheck = document.getElementById('register-last-check');
+            
+            indicator.className = 'status-indicator checking';
+            status.textContent = 'Checking...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'test@test.com'
+                    })
+                });
+                
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+                
+                // For register endpoint, 401 means it's working correctly (needs admin key)
+                if (response.status === 401) {
+                    indicator.className = 'status-indicator online';
+                    status.textContent = '✅ Online (401 - Admin Key Required)';
+                    responseTime.textContent = `${duration}ms`;
+                    addLog(`Register endpoint is healthy - correctly requiring admin authorization (${duration}ms)`, 'success');
+                } else if (response.ok) {
+                    indicator.className = 'status-indicator online';
+                    status.textContent = `✅ Online (${response.status})`;
+                    responseTime.textContent = `${duration}ms`;
+                    addLog(`Register endpoint is healthy (${duration}ms)`, 'success');
+                } else {
+                    indicator.className = 'status-indicator offline';
+                    status.textContent = `❌ Error ${response.status}`;
+                    responseTime.textContent = `${duration}ms`;
+                    addLog(`Register endpoint returned unexpected ${response.status} error`, 'error');
+                }
+                
+                lastCheck.textContent = new Date().toLocaleTimeString();
+                
+            } catch (error) {
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+                
+                indicator.className = 'status-indicator offline';
+                status.textContent = '❌ Offline';
+                responseTime.textContent = `${duration}ms`;
+                lastCheck.textContent = new Date().toLocaleTimeString();
+                
+                addLog(`Register endpoint failed: ${error.message}`, 'error');
+            }
         }
         
         async function checkAllEndpoints() {
